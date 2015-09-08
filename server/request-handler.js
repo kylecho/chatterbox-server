@@ -11,7 +11,6 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
-
 data = {results: []};
 
 var requestHandler = function(request, response) {
@@ -55,23 +54,20 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  // var urls = {
-  //   '/classes/messages': 'messages',
-  //   '/send': 'send',
-  // };
 
+  var paths = {
+    '/classes/messages': true,
+    '/classes/room1' : true
+  };
 
-  if (request.method === 'GET' && request.url === '/classes/messages') {
+  if (request.method === 'GET' && paths[request.url]) {
     response.writeHead(200, headers);
     response.end(JSON.stringify(data));
     statusCode = 200;
   } else if (request.method === 'POST') {
     request.on('data', function(input) {
       var parsed = JSON.parse(input);
-      console.log(parsed);
-      console.log(data);
       data.results.push(parsed);
-      // we should return 'parsed'
     });
 
     response.writeHead(201, "OK", {'Content-Type': 'text/html'});
@@ -81,6 +77,7 @@ var requestHandler = function(request, response) {
     response.end();
   }
 };
+
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
 // This code allows this server to talk to websites that
