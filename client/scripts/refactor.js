@@ -21,7 +21,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 var Message = Backbone.Model.extend({
-  url: 'http://127.0.0.1:3000/classes/messages/',
+  url: 'http://127.0.0.1:3000/classes/messages',
   defaults: {
     username: '',
     text: ''
@@ -31,10 +31,11 @@ var Message = Backbone.Model.extend({
 var Messages = Backbone.Collection.extend({
 
   model: Message,
-  url: 'http://127.0.0.1:3000/classes/messages/',
+  url: 'http://127.0.0.1:3000/classes/messages',
 
   loadMsgs: function() {
-    this.fetch({data: { order: '-createdAt' }});
+    this.fetch();
+    // this.fetch({data: { order: '-createdAt' }});
   },
 
   parse: function(response, options) {
@@ -88,10 +89,14 @@ var MessageView = Backbone.View.extend({
     this.model.on('change', this.render, this);
   },
 
-  template: _.template('<div class="chat" data-id="<%- objectId %>"> \
+  template: _.template('<div class="chat" data-id=""> \
                           <div class="user"><%- username %></div> \
                           <div class="text"><%- text %></div> \
                         </div>'),
+  // template: _.template('<div class="chat" data-id="<%- objectId %>"> \
+  //                         <div class="user"><%- username %></div> \
+  //                         <div class="text"><%- text %></div> \
+  //                       </div>'),
 
   render: function() {
     this.$el.html(this.template(this.model.attributes));

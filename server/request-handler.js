@@ -33,6 +33,12 @@ var requestHandler = function(request, response) {
   // The outgoing status.
   // var statusCode = 200; // KC.
   var statusCode;
+  var defaultCorsHeaders = {
+    "access-control-allow-origin": "*",
+    "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "access-control-allow-headers": "content-type, accept",
+    "access-control-max-age": 10 // Seconds.
+  };
 
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
@@ -41,7 +47,7 @@ var requestHandler = function(request, response) {
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = "text/plain";
+  headers['Content-Type'] = "application/json";
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
@@ -59,21 +65,28 @@ var requestHandler = function(request, response) {
     '/classes/messages': true,
     '/classes/room1' : true
   };
-
   if (request.method === 'GET' && paths[request.url]) {
     response.writeHead(200, headers);
     response.end(JSON.stringify(data));
-    statusCode = 200;
+ 
   } else if (request.method === 'POST') {
+    var accumulatedData = '';
     request.on('data', function(input) {
-      var parsed = JSON.parse(input);
+      accumulatedData += input;
+    });
+    request.on('end', function(input) {
+      var parsed = JSON.parse(accumulatedData);
       data.results.push(parsed);
+      console.log(parsed);
     });
 
-    response.writeHead(201, "OK", {'Content-Type': 'text/html'});
+    response.writeHead(201, headers);
+    response.end();
+  } else if (request.method === 'OPTIONS' && paths[request.url]) {
+    response.writeHead(200, headers);
     response.end();
   } else {
-    response.writeHead(404, 'Not Found', {'Content-Type': 'text/html'});
+    response.writeHead(404, headers);
     response.end();
   }
 };
@@ -88,12 +101,7 @@ var requestHandler = function(request, response) {
 //
 // Another way to get around this restriction is to serve you chat
 // client from this domain by setting up static file serving.
-var defaultCorsHeaders = {
-  "access-control-allow-origin": "*",
-  "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "access-control-allow-headers": "content-type, accept",
-  "access-control-max-age": 10 // Seconds.
-};
+
 
 module.exports.requestHandler = requestHandler;
 
